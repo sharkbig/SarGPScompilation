@@ -1,0 +1,27 @@
+
+This code is developed by Jun-Yan Chen (2022). 
+This code contain two parts:
+ 1. Using GPS to the SAR line of sight velocity with second order polynomial plane.
+ 2. Least square velocity inversion of Los to east-west and up-dip component. 
+ 
+First, you need to have a GPS data and file columes should in the order: 
+    station_name, lon, lat, N vel, E vel, Z vel
+
+
+package needed: 
+1. gmt
+2. python3
+
+### Step 1: Extract LoS-velocity at each GPS station
+First, using GMT to sample the SAR LoS-velocioty at each GPS station.
+`awk -F, "{print $2,$3,$4,$5,$6}" GPSFILE | gmt grdtrack -G$SBAS1 -T0.01 > LosSampled`
+
+### Step 2: plane fitting with GPS value
+`python GPSCorrection.py SARIMG LosSampled incident_angle azimuth_angle -m False -o CorrectSAR`
+
+
+### Step 3: Least square inversion
+After processing both ascending and descending image:
+In the previous will generate CorrectSAR_deramp.nc 
+`python rdr2geo.py IMG1 inc1 az1 IMG2 inc2 az2 --gps GPSFILE`
+
